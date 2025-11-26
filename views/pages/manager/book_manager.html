@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>图书管理</title>
+<link type="text/css" rel="stylesheet" href="/static/css/style.css" >
+	<script src="/static/script/jquery-1.7.2.js"></script>
+	<script>
+		$(function(){
+			// 给删除图书设置提示
+			$(".deleteBook").click(function (){
+				//获取书名
+				var title = $(this).attr("id")
+				return confirm("是否删除["+title+"]？");
+				//false就取消
+			});
+		});
+	</script>
+</head>
+<body>
+	
+	<div id="header">
+			<img class="logo_img" alt="" src="/static/img/logo.gif" >
+			<span class="wel_word">图书管理系统</span>
+			<div>
+<!--				<a href="/getBooks">图书管理</a>-->
+				<a href="/getPageBooks">图书管理</a>
+				<a href="/getOrders">订单管理</a>
+				<a href="/main">返回商城</a>
+			</div>
+	</div>
+	
+	<div id="main">
+		<table>
+			<tr>
+				<td>名称</td>
+				<td>价格</td>
+				<td>作者</td>
+				<td>销量</td>
+				<td>库存</td>
+				<td colspan="2">操作</td>
+			</tr>
+			{{range .Books}}
+			
+			<tr>
+				<td>{{.Title}}</td>
+				<td>{{.Price}}</td>
+				<td>{{.Author}}</td>
+				<td>{{.Sales}}</td>
+				<td>{{.Stock}}</td>
+				<td><a href="/getOneBook?bookId={{.ID}}">修改</a> </td>
+				<td><a id="{{.Title}}" class="deleteBook" href="/deleteBook?bookId={{.ID}}">删除</a> </td>
+			</tr>
+
+
+			{{end}}
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td><a href="/getOneBook" class="add-btn">＋ 添加图书</a></td>
+			</tr>
+		</table>
+	</div>
+
+	<div id="page_nav">
+		{{if .IsHasPrev}}
+		<a href="/getPageBooks">首页</a>
+		<a href="/getPageBooks?pageNum={{.GetPre}}">上一页</a>
+		{{end}}
+		当前是第{{.PageNum}}页,共{{.TotalPageNum}}页，共{{.TotalRecord}}条记录
+		{{if .IsHasNext}}
+		<a href="/getPageBooks?pageNum={{.GetNext}}">下一页</a>
+		<a href="/getPageBooks?pageNum={{.TotalPageNum}}">末页</a>
+		{{end}}
+		 到第<input value="{{.PageNum}}" name="pn" id="pn_input"/>页
+		<input type="button" value="确定" id="sub">
+		<script>
+			//绑定单机事件
+			$("#sub").click(function (){
+				//获取页面
+				var pageNum =$("#pn_input").val();
+				location = "/getPageBooks?pageNum="+pageNum
+			});
+		</script>
+	</div>
+	
+	<div id="bottom">
+		<span>
+			尚硅谷书城.Copyright &copy;2015
+		</span>
+	</div>
+</body>
+</html>

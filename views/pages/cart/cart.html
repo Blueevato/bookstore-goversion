@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>购物车</title>
+<link type="text/css" rel="stylesheet" href="/static/css/style.css" >
+	<script src="/static/script/jquery-1.7.2.js"></script>
+	<script>
+		$(function (){
+			//给清空购物车的超链接绑定单机事件
+			$("#emptyCart").click(function (){
+				//获取超链接后的隐藏域
+				var $inputHidden = $(this).next();
+				//获取隐藏域里的值
+				var cartID = $inputHidden.val();
+				//alert(cartID);
+				return confirm("是否要清空购物车？,id值为："+cartID)
+			});
+
+			//给删除购物项的超链接绑定单机事件
+			$(".deleteCartItem").click(function (){
+					//获取图书名称
+				var BookTitle = $(this).attr("id");
+				return confirm("确定要删除【"+BookTitle+"】吗？")
+			});
+
+			//给输入购物项数量的input绑定change事件
+			$(".updateCartItem").change(function (){
+				//alert("1")
+				//获取购物项id，用户输入的值
+				var cartItemId =$(this).attr("id");
+				var bookCount =$(this).val();
+
+				// 验证输入值：必须是大于0的整数
+				var regex = /^[1-9]\d*$/; // 匹配1位或以上的正整数
+
+				if (!regex.test(bookCount)) {
+					alert("请输入大于0的整数！");
+					$(this).val("1"); // 重置为默认值1
+					$(this).focus();  // 聚焦到输入框
+					return; // 停止执行
+				}
+
+				//发送请求
+				//location = "/updateCartItem?cartItemId="+cartItemId+"&bookCount="+bookCount;
+
+				//获取购物项的金额小计
+				var $tdEle = $(this).parent().next().next();
+
+				//发送Ajax异步请求
+				var url ="/updateCartItem"
+				var params ={"cartItemId":cartItemId,"bookCount":bookCount}
+				$.post(url,params,function (res){
+						//alert(res);
+					$("#totalCount").text(res.TotalCount);
+					$("#totalAmount").text(res.TotalAmount);
+					$tdEle.text(res.Amount);
+				},"json");
+
+			});
+		});
+
+	</script>
+</head>
+<body>
+	
+	<div id="header">
+			<img class="logo_img" alt="" src="/static/img/logo.gif" >
+			<span class="wel_word">购物车</span>
+		{{if .UserID}}
+		<div>
+			<span>欢迎<span class="um_span">{{.UserName}}</span>光临尚硅谷书城</span>
+			<a href="/getCartInfo">购物车</a>
+			<a href="/getMyOrder">我的订单</a>
+			<a href="/logout">注销</a>&nbsp;&nbsp;
+			<a href="/main">返回</a>
+		</div>
+		{{else}}
+		<div>
+			<a href="/pages/user/login.html">登录</a> |
+			<a href="/pages/user/regist.html">注册</a> &nbsp;&nbsp;
+			<a href="/pages/cart/cart.html">购物车</a>
+			<a href="/getOrders">订单管理</a>
+			<a href="/pages/manager/manager.html">后台管理</a>
+		</div>
+		{{end}}
+	</div>
+
+	<div id="main">
+		{{if gt .TotalCount 0}}  <!-- 检查商品数量是否大于0 -->
+		<table>
+			<tr>
+				<td>商品名称</td>
+				<td>数量</td>
+				<td>单价</td>
+				<td>金额</td>
+				<td>操作</td>
+			</tr>
+			{{range .CartItems}}
+			<tr>
+				<td>{{.Book.Title}}</td>
+				<td><input id="{{.CartItemID}}" class="updateCartItem" type="text" value="{{.Count}}" style="text-align: center;width: 50px;"/></td>
+				<td>{{.Book.Price}}</td>
+				<td>{{.Amount}}</td>
+				<td><a id="{{.Book.Title}}" class="deleteCartItem" href="/deleteCartItem?cartItemId={{.CartItemID}}">删除</a></td>
+			</tr>
+			{{end}}
+		</table>
+		<div class="cart_info">
+			<span class="cart_span">购物车中共有<span class="b_count" id="totalCount">{{.TotalCount}}</span>件商品</span>
+			<span class="cart_span">总金额<span class="b_price"  id="totalAmount">{{.TotalAmount}}</span>元</span>
+			<span class="cart_span"><a href="/main">继续购物</a></span>
+			<span class="cart_span"><a href="/deleteCart?CartId={{.CartID}}" id="emptyCart" >清空购物车</a>
+			<input type="hidden" value="{{.CartID}}"/></span>
+			<span class="cart_span"><a href="/checkout">去结账</a></span>
+		</div>
+		{{else}}
+		<!-- 当购物车为空时显示 -->
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+		<h1 style="text-align: center">您的购物车空空如也！<a href="/main" style="color: brown">点击购物</a></h1>
+		{{end}}
+	</div>
+	
+	<div id="bottom">
+		<span>
+			尚硅谷书城.Copyright &copy;2015
+		</span>
+	</div>
+</body>
+</html>
